@@ -30,11 +30,18 @@
 
 package org.isel.jingle;
 
+import org.isel.jingle.dto.AlbumDto;
+import org.isel.jingle.dto.ArtistDto;
+import org.isel.jingle.dto.TrackDto;
 import org.isel.jingle.model.Album;
 import org.isel.jingle.model.Artist;
 import org.isel.jingle.model.Track;
+import org.isel.jingle.util.queries.LazyQueries;
 import org.isel.jingle.util.req.BaseRequest;
 import org.isel.jingle.util.req.HttpRequest;
+
+import static org.isel.jingle.util.queries.LazyQueries.from;
+import static org.isel.jingle.util.queries.LazyQueries.last;
 
 public class JingleService {
 
@@ -49,18 +56,57 @@ public class JingleService {
     }
 
     public Iterable<Artist> searchArtist(String name) {
-        throw new UnsupportedOperationException();
+        Iterable<ArtistDto> artistsDto = LazyQueries.from(api.searchArtist(name, 1));
+        return LazyQueries.map(artistsDto, this::toArtist);
+    }
+
+    private Artist toArtist(ArtistDto artistDto) {
+
+        String mbId = artistDto.getMbid();
+
+        Iterable<Album> albums = () -> getAlbums(mbId).iterator();
+        Iterable<Track> tracks = () -> getTracks(mbId).iterator();
+
+        return new Artist(
+                artistDto.getName(),
+                artistDto.getListeners(),
+                mbId,
+                artistDto.getUrl(),
+                null,
+                albums,
+                tracks);
     }
 
     private Iterable<Album> getAlbums(String artistMbid) {
-        throw new UnsupportedOperationException();
+        Iterable<AlbumDto> albumsDto = LazyQueries.from(api.getAlbums(artistMbid, 1));
+        return LazyQueries.map(albumsDto, this::toAlbum);
     }
 
-    private Iterable<Track> getAlbumTracks(String albumMbid) {
-        throw new UnsupportedOperationException();
+    private Album toAlbum(AlbumDto albumDto) {
+
+        Iterable<Track> tracks = () -> getAlbumTracks(albumDto.getMbid()).iterator();
+
+        return new Album(
+                albumDto.getName(),
+                albumDto.getPlaycount(),
+                albumDto.getMbid(),
+                albumDto.getUrl(),
+                null,
+                tracks);
     }
 
     private Iterable<Track> getTracks(String artistMbid) {
-        throw new UnsupportedOperationException();
+        return LazyQueries.flatMap(getAlbums(artistMbid),(a) -> a.getTracks());
     }
+
+    private Iterable<Track> getAlbumTracks(String albumMbid) {
+        Iterable<TrackDto> tracksDto = LazyQueries.from(api.getAlbumInfo(albumMbid));
+        return LazyQueries.map(tracksDto, this::toTrack);
+    }
+
+    private Track toTrack(TrackDto trackDto) {
+        return new Track(trackDto.getName(), trackDto.getUrl(), trackDto.getDuration());
+    }
+
+
 }
