@@ -83,6 +83,10 @@ public class LastfmWebApi {
     }
 
     public TrackDto[] getAlbumInfo(String albumMbid){
+
+        if (albumMbid == null) //ATTENTION: some albums don't have mbid
+            return new TrackDto[0];
+
         String path = String.format(LASTFM_GET_ALBUM_INFO, albumMbid);
         Iterable<String> src = request.getLines(path);
         String body = String.join("", src);

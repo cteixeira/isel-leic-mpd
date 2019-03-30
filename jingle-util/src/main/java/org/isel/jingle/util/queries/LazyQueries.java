@@ -128,7 +128,7 @@ public class LazyQueries {
         return () -> new Iterator<T>() {
             int cur = 0;
             public boolean hasNext() { return cur < items.length; }
-            public T next() { return items[cur++]; }
+            public T next() { return hasNext() ? items[cur++] : null; }
         };
     }
 

@@ -105,7 +105,7 @@ public class JingleService {
     }
 
     private Track toTrack(TrackDto trackDto) {
-        return new Track(trackDto.getName(), trackDto.getUrl(), trackDto.getDuration());
+        return trackDto != null ? new Track(trackDto.getName(), trackDto.getUrl(), trackDto.getDuration()) : null;
     }
 
 
