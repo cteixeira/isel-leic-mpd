@@ -56,8 +56,16 @@ public class JingleService {
     }
 
     public Iterable<Artist> searchArtist(String name) {
-        Iterable<ArtistDto> artistsDto = LazyQueries.from(api.searchArtist(name, 1));
-        return LazyQueries.map(artistsDto, this::toArtist);
+
+        boolean hasMore[] = {true};
+
+        Iterable<ArtistDto> artistDtos = LazyQueries.takeWhile(LazyQueries.flatMap(LazyQueries.iterate(1, page -> page + 1), page -> {
+            ArtistDto[] artistsArr = api.searchArtist(name, page);
+            hasMore[0] = artistsArr.length > 0;
+            return LazyQueries.from(artistsArr);
+        }), a -> hasMore[0]);
+
+        return LazyQueries.map(artistDtos, this::toArtist);
     }
 
     private Artist toArtist(ArtistDto artistDto) {
