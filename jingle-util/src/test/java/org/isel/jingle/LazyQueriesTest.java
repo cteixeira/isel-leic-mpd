@@ -125,4 +125,14 @@ public class LazyQueriesTest {
         Iterable<String> iterItems = from(items);
         assertEquals(12, count(flatMap(iterItems, (s) -> from(s.chars().mapToObj(c -> (char)c).toArray(Character[]::new)))));
     }
+
+    @Test
+    public void testCache(){
+        Random r = new Random();
+        Iterable<Integer> nrs = generate(() -> r.nextInt(100));
+        nrs = cache(nrs);
+        Object[] expected = toArray(limit(nrs, 10));
+        Object[] actual = toArray(limit(nrs, 10));
+        assertArrayEquals(expected, actual);
+    }
 }

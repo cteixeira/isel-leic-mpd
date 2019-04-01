@@ -62,9 +62,11 @@ public class JingleService {
         Iterable<ArtistDto> artistDtos = LazyQueries.takeWhile(LazyQueries.flatMap(LazyQueries.iterate(1, page -> page + 1), page -> {
             ArtistDto[] artistsArr = api.searchArtist(name, page);
             hasMore[0] = artistsArr.length > 0;
+            //return LazyQueries.cache(LazyQueries.from(artistsArr));
             return LazyQueries.from(artistsArr);
         }), a -> hasMore[0]);
 
+        //return LazyQueries.cache(LazyQueries.map(artistDtos, this::toArtist));
         return LazyQueries.map(artistDtos, this::toArtist);
     }
 
@@ -86,7 +88,17 @@ public class JingleService {
     }
 
     private Iterable<Album> getAlbums(String artistMbid) {
-        Iterable<AlbumDto> albumsDto = LazyQueries.from(api.getAlbums(artistMbid, 1));
+        //Iterable<AlbumDto> albumsDto = LazyQueries.from(api.getAlbums(artistMbid, 1));
+        //return LazyQueries.map(albumsDto, this::toAlbum);
+
+        boolean hasMore[] = {true};
+
+        Iterable<AlbumDto> albumsDto = LazyQueries.takeWhile(LazyQueries.flatMap(LazyQueries.iterate(1, page -> page + 1), page -> {
+            AlbumDto[] albumsArr = api.getAlbums(artistMbid, page);
+            hasMore[0] = albumsArr.length > 0;
+            return LazyQueries.from(albumsArr);
+        }), a -> hasMore[0]);
+
         return LazyQueries.map(albumsDto, this::toAlbum);
     }
 

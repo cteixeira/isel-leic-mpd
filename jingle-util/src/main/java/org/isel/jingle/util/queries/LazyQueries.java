@@ -139,4 +139,15 @@ public class LazyQueries {
     public static <T, R> Iterable<R> flatMap(Iterable<T> src, Function<T, Iterable<R>> mapper){
         return () -> new IteratorFlatMap(src, mapper);
     }
+
+    //TODO: We could have concurrency problems if we have cache requests for different src(s)
+    private static LinkedList<Object> srcList;
+
+    public static <T> Iterable<T> cache(Iterable<T> src) {
+        return () -> {
+            if (srcList == null)
+                srcList = new LinkedList();
+            return new IteratorCache(src, srcList);
+        };
+    }
 }
