@@ -30,12 +30,10 @@
 
 package org.isel.jingle;
 
-import com.sun.deploy.util.ArrayUtil;
 import junit.framework.AssertionFailedError;
 import org.isel.jingle.util.queries.LazyQueries;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -43,7 +41,6 @@ import java.util.Random;
 import static java.lang.System.out;
 import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
 import static org.isel.jingle.util.queries.LazyQueries.*;
 import static org.junit.Assert.assertArrayEquals;
 
