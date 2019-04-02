@@ -54,19 +54,11 @@ public class IteratorCache<T> implements Iterator<T> {
 
     @Override
     public T next() {
-
-        if (!hasNext())
-            throw new NoSuchElementException();
-
         T next;
-        if(srcList.size() > pos) {
-            src.next(); // TODO: needs to move to next position???? Doesn't this fires the http request?
+        if(srcList.size() > pos)
             next = srcList.get(pos);
-        }
-        else{
-            next = src.next();
-            srcList.add(next);
-        }
+        else
+            srcList.add(next = src.next());
         pos++;
         return next;
     }

@@ -66,8 +66,8 @@ public class JingleService {
             return LazyQueries.from(artistsArr);
         }), a -> hasMore[0]);
 
-        //return LazyQueries.cache(LazyQueries.map(artistDtos, this::toArtist));
-        return LazyQueries.map(artistDtos, this::toArtist);
+        return LazyQueries.cache(LazyQueries.map(artistDtos, this::toArtist));
+        //return LazyQueries.map(artistDtos, this::toArtist);
     }
 
     private Artist toArtist(ArtistDto artistDto) {
