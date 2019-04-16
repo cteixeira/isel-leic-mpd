@@ -28,55 +28,24 @@
  *
  */
 
-package org.isel.jingle.util.iterators;
+package org.isel.jingle.req;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.NoSuchElementException;
-import java.util.function.Predicate;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
-public class IteratorCache<T> implements Iterator<T> {
+public class BaseRequest implements Request {
 
-    private Iterator<T> src;
-    private LinkedList<T> cache;
-    int pos;
+    private final Function<String, InputStream> openStream;
 
-    public IteratorCache(Iterable<T> iter, LinkedList<T> list) {
-        this.src = iter.iterator();
-        this.cache = list;
-        pos = 0;
+    public BaseRequest(Function<String, InputStream> openStream) {
+        this.openStream = openStream;
     }
 
-    @Override
-    public boolean hasNext() {
-        if(cache.size()>pos)
-            return true;
-        else if(src.hasNext()) {
-            cache.add(src.next());
-            return true;
-        }
-        pos = 0;
-        return false;
+    public final Stream<String> getLines(String path) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(openStream.apply(path)));
+        return reader.lines();
     }
-
-    @Override
-    public T next() {
-        return cache.get(pos++);
-    }
-
-    /*@Override
-    public boolean hasNext() {
-        return src.hasNext();
-    }
-
-    @Override
-    public T next() {
-        T next;
-        if(cache.size() > pos)
-            next = cache.get(pos);
-        else
-            cache.add(next = src.next());
-        pos++;
-        return next;
-    }*/
 }

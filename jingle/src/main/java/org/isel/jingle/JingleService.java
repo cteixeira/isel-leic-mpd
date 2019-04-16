@@ -36,12 +36,11 @@ import org.isel.jingle.dto.TrackDto;
 import org.isel.jingle.model.Album;
 import org.isel.jingle.model.Artist;
 import org.isel.jingle.model.Track;
-import org.isel.jingle.util.queries.LazyQueries;
-import org.isel.jingle.util.req.BaseRequest;
-import org.isel.jingle.util.req.HttpRequest;
+import org.isel.jingle.req.BaseRequest;
+import org.isel.jingle.req.HttpRequest;
 
-import static org.isel.jingle.util.queries.LazyQueries.from;
-import static org.isel.jingle.util.queries.LazyQueries.last;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class JingleService {
 
@@ -55,28 +54,27 @@ public class JingleService {
         this(new LastfmWebApi(new BaseRequest(HttpRequest::openStream)));
     }
 
-    public Iterable<Artist> searchArtist(String name) {
+    public Stream<Artist> searchArtist(String name) {
 
         boolean hasMore[] = {true};
 
-        Iterable<ArtistDto> artistDtos =
-                LazyQueries.takeWhile(
-                        LazyQueries.flatMap(
-                                LazyQueries.iterate(1, page -> page + 1), page -> {
-                                    ArtistDto[] artistsArr = api.searchArtist(name, page);
-                                    hasMore[0] = artistsArr.length > 0;
-                                    return LazyQueries.from(artistsArr);
-                }), a -> hasMore[0]);
-
-        return LazyQueries.map(artistDtos, this::toArtist);
+        return Stream
+                .iterate(1, page -> page + 1)
+                .takeWhile(page -> hasMore[0])
+                .flatMap(page -> {
+                    ArtistDto[] artistsArr = api.searchArtist(name, page);
+                    hasMore[0] = artistsArr.length > 0;
+                    return Stream.of(artistsArr);
+                })
+                .map(this::toArtist);
     }
 
     private Artist toArtist(ArtistDto artistDto) {
 
         String mbId = artistDto.getMbid();
 
-        Iterable<Album> albums = () -> getAlbums(mbId).iterator();
-        Iterable<Track> tracks = () -> getTracks(mbId).iterator();
+        Supplier<Stream<Album>> albumsSupplier = () -> getAlbums(mbId);
+        Supplier<Stream<Track>> tracksSupplier = () -> getTracks(mbId);
 
         return new Artist(
                 artistDto.getName(),
@@ -84,28 +82,28 @@ public class JingleService {
                 mbId,
                 artistDto.getUrl(),
                 null,
-                albums,
-                tracks);
+                albumsSupplier,
+                tracksSupplier);
     }
 
-    private Iterable<Album> getAlbums(String artistMbid) {
-        //Iterable<AlbumDto> albumsDto = LazyQueries.from(api.getAlbums(artistMbid, 1));
-        //return LazyQueries.map(albumsDto, this::toAlbum);
+    private Stream<Album> getAlbums(String artistMbid) {
 
         boolean hasMore[] = {true};
 
-        Iterable<AlbumDto> albumsDto = LazyQueries.takeWhile(LazyQueries.flatMap(LazyQueries.iterate(1, page -> page + 1), page -> {
-            AlbumDto[] albumsArr = api.getAlbums(artistMbid, page);
-            hasMore[0] = albumsArr.length > 0;
-            return LazyQueries.from(albumsArr);
-        }), a -> hasMore[0]);
-
-        return LazyQueries.map(albumsDto, this::toAlbum);
+        return Stream
+                .iterate(1, page -> page + 1)
+                .takeWhile(page -> hasMore[0])
+                .flatMap(page -> {
+                    AlbumDto[] albumsArr = api.getAlbums(artistMbid, page);
+                    hasMore[0] = albumsArr.length > 0;
+                    return Stream.of(albumsArr);
+                })
+                .map(this::toAlbum);
     }
 
     private Album toAlbum(AlbumDto albumDto) {
 
-        Iterable<Track> tracks = () -> getAlbumTracks(albumDto.getMbid()).iterator();
+        Supplier<Stream<Track>> tracksSupplier = () -> getAlbumTracks(albumDto.getMbid());
 
         return new Album(
                 albumDto.getName(),
@@ -113,16 +111,17 @@ public class JingleService {
                 albumDto.getMbid(),
                 albumDto.getUrl(),
                 null,
-                tracks);
+                tracksSupplier);
     }
 
-    private Iterable<Track> getTracks(String artistMbid) {
-        return LazyQueries.flatMap(getAlbums(artistMbid),(a) -> a.getTracks());
+    private Stream<Track> getTracks(String artistMbid) {
+        return getAlbums(artistMbid).flatMap(album -> album.getTracks());
     }
 
-    private Iterable<Track> getAlbumTracks(String albumMbid) {
-        Iterable<TrackDto> tracksDto = LazyQueries.from(api.getAlbumInfo(albumMbid));
-        return LazyQueries.map(tracksDto, this::toTrack);
+    private Stream<Track> getAlbumTracks(String albumMbid) {
+        return Stream
+                .of(api.getAlbumInfo(albumMbid))
+                .map(this::toTrack);
     }
 
     private Track toTrack(TrackDto trackDto) {

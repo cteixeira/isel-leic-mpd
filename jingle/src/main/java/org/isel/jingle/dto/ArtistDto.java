@@ -28,55 +28,40 @@
  *
  */
 
-package org.isel.jingle.util.iterators;
+package org.isel.jingle.dto;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.NoSuchElementException;
-import java.util.function.Predicate;
+public class ArtistDto {
+    final String name;
+    final int listeners;
+    final String mbid;
+    final String url;
+    final ImageDto[] image;
 
-public class IteratorCache<T> implements Iterator<T> {
-
-    private Iterator<T> src;
-    private LinkedList<T> cache;
-    int pos;
-
-    public IteratorCache(Iterable<T> iter, LinkedList<T> list) {
-        this.src = iter.iterator();
-        this.cache = list;
-        pos = 0;
+    public ArtistDto(String name, int listeners, String mbid, String url, ImageDto[] image) {
+        this.name = name;
+        this.listeners = listeners;
+        this.mbid = mbid;
+        this.url = url;
+        this.image = image;
     }
 
-    @Override
-    public boolean hasNext() {
-        if(cache.size()>pos)
-            return true;
-        else if(src.hasNext()) {
-            cache.add(src.next());
-            return true;
-        }
-        pos = 0;
-        return false;
+    public String getName() {
+        return name;
     }
 
-    @Override
-    public T next() {
-        return cache.get(pos++);
+    public int getListeners() {
+        return listeners;
     }
 
-    /*@Override
-    public boolean hasNext() {
-        return src.hasNext();
+    public String getMbid() {
+        return mbid;
     }
 
-    @Override
-    public T next() {
-        T next;
-        if(cache.size() > pos)
-            next = cache.get(pos);
-        else
-            cache.add(next = src.next());
-        pos++;
-        return next;
-    }*/
+    public String getUrl() {
+        return url;
+    }
+
+    public ImageDto[] getImage() {
+        return image;
+    }
 }

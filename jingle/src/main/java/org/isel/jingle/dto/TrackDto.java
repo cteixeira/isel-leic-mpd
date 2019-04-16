@@ -28,55 +28,28 @@
  *
  */
 
-package org.isel.jingle.util.iterators;
+package org.isel.jingle.dto;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.NoSuchElementException;
-import java.util.function.Predicate;
+public class TrackDto {
+    private final String name;
+    private final String url;
+    private final int duration;
 
-public class IteratorCache<T> implements Iterator<T> {
-
-    private Iterator<T> src;
-    private LinkedList<T> cache;
-    int pos;
-
-    public IteratorCache(Iterable<T> iter, LinkedList<T> list) {
-        this.src = iter.iterator();
-        this.cache = list;
-        pos = 0;
+    public TrackDto(String name, String url, int duration) {
+        this.name = name;
+        this.url = url;
+        this.duration = duration;
     }
 
-    @Override
-    public boolean hasNext() {
-        if(cache.size()>pos)
-            return true;
-        else if(src.hasNext()) {
-            cache.add(src.next());
-            return true;
-        }
-        pos = 0;
-        return false;
+    public String getName() {
+        return name;
     }
 
-    @Override
-    public T next() {
-        return cache.get(pos++);
+    public String getUrl() {
+        return url;
     }
 
-    /*@Override
-    public boolean hasNext() {
-        return src.hasNext();
+    public int getDuration() {
+        return duration;
     }
-
-    @Override
-    public T next() {
-        T next;
-        if(cache.size() > pos)
-            next = cache.get(pos);
-        else
-            cache.add(next = src.next());
-        pos++;
-        return next;
-    }*/
 }

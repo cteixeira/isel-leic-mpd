@@ -28,55 +28,17 @@
  *
  */
 
-package org.isel.jingle.util.iterators;
+package org.isel.jingle.dto;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.NoSuchElementException;
-import java.util.function.Predicate;
+public class TracksDto {
 
-public class IteratorCache<T> implements Iterator<T> {
+    private final TrackDto[] track;
 
-    private Iterator<T> src;
-    private LinkedList<T> cache;
-    int pos;
-
-    public IteratorCache(Iterable<T> iter, LinkedList<T> list) {
-        this.src = iter.iterator();
-        this.cache = list;
-        pos = 0;
+    public TracksDto(TrackDto[] track) {
+        this.track = track;
     }
 
-    @Override
-    public boolean hasNext() {
-        if(cache.size()>pos)
-            return true;
-        else if(src.hasNext()) {
-            cache.add(src.next());
-            return true;
-        }
-        pos = 0;
-        return false;
+    public TrackDto[] getTracks() {
+        return track;
     }
-
-    @Override
-    public T next() {
-        return cache.get(pos++);
-    }
-
-    /*@Override
-    public boolean hasNext() {
-        return src.hasNext();
-    }
-
-    @Override
-    public T next() {
-        T next;
-        if(cache.size() > pos)
-            next = cache.get(pos);
-        else
-            cache.add(next = src.next());
-        pos++;
-        return next;
-    }*/
 }

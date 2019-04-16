@@ -2,5 +2,6 @@
 
 include 'jingle-util'
 include 'jingle-lazy'
+include 'jingle'
 
 rootProject.name = 'jingle'
