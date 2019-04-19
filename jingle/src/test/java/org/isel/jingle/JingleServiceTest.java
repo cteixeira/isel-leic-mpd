@@ -30,19 +30,17 @@
 
 package org.isel.jingle;
 
-import junit.framework.Assert;
 import org.isel.jingle.model.Album;
 import org.isel.jingle.model.Artist;
 import org.isel.jingle.model.Track;
 import org.isel.jingle.req.BaseRequest;
 import org.isel.jingle.req.HttpRequest;
+import org.isel.jingle.utils.StreamUtils;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static junit.framework.Assert.assertEquals;
@@ -73,17 +71,17 @@ public class JingleServiceTest {
         assertEquals(49, httpGet.count);
     }
 
-    /*@Test
+    @Test
     public void searchHiperAndCountAllResultsWithCache() {
         HttpGet httpGet = new HttpGet();
         JingleService service = new JingleService(new LastfmWebApi(new BaseRequest(httpGet)));
         Stream<Artist> artists = service.searchArtist("hiper");
-        artists = LazyQueries.cache(artists);
-        Object[] expected = LazyQueries.toArray(limit(artists, 700));
-        Object[] actual = LazyQueries.toArray(limit(artists, 700));
+        Supplier<Stream<Artist>> artistsSupplier = StreamUtils.cache(artists);
+        Object[] expected = artistsSupplier.get().limit(700).toArray();
+        Object[] actual = artistsSupplier.get().limit(800).toArray();
         assertArrayEquals(expected,actual);
         assertEquals(24, httpGet.count);
-    }*/
+    }
 
     @Test
     public void getFirstAlbumOfMuse() {
