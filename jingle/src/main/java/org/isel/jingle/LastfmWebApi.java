@@ -55,6 +55,11 @@ public class LastfmWebApi {
     private static final String LASTFM_GET_ALBUM_INFO = LASTFM_HOST
                                                     + "?method=album.getinfo&format=json&mbid=%s&api_key="
                                                     + LASTFM_API_KEY;
+
+    private static final String LASTFM_GET_TOP_TRACKS = LASTFM_HOST
+                                                        + "?method=geo.gettoptracks&format=json&country=%s&page=%d&api_key="
+                                                        + LASTFM_API_KEY;
+
     private final Request request;
     protected final Gson gson;
 
@@ -95,6 +100,15 @@ public class LastfmWebApi {
         String body = src.collect(Collectors.joining());
         GetAlbumInfoDto dto = gson.fromJson(body, GetAlbumInfoDto.class);
         TrackDto[] tracks = dto.getAlbum().getTracks().getTracks();
+        return tracks;
+    }
+
+    public TrackDto[] getTopTracks(String country, int page){
+        String path = String.format(LASTFM_GET_TOP_TRACKS, country, page);
+        Stream<String> src = request.getLines(path);
+        String body = src.collect(Collectors.joining());
+        GetTopTracksDto dto = gson.fromJson(body, GetTopTracksDto.class);
+        TrackDto[] tracks = dto.getTopTracks().getTracks();
         return tracks;
     }
 }

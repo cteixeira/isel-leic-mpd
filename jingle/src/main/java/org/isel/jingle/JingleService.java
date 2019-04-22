@@ -69,6 +69,21 @@ public class JingleService {
                 .map(this::toArtist);
     }
 
+    public Stream<Track> getTopTracks(String country) {
+
+        boolean hasMore[] = {true};
+
+        return Stream
+                .iterate(1, page -> page + 1)
+                .takeWhile(page -> hasMore[0])
+                .flatMap(page -> {
+                    TrackDto[] tracksArr = api.getTopTracks(country, page);
+                    hasMore[0] = tracksArr.length > 0;
+                    return Stream.of(tracksArr);
+                })
+                .map(this::toTrack);
+    }
+
     private Artist toArtist(ArtistDto artistDto) {
 
         String mbId = artistDto.getMbid();

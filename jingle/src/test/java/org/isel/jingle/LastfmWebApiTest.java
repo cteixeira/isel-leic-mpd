@@ -71,4 +71,12 @@ public class LastfmWebApiTest {
         TrackDto track = api.getAlbumInfo(album.getMbid())[1];
         assertEquals("Starlight", track.getName());
     }
+
+    @Test
+    public void getTopTracksFromSpain(){
+        Request req = new BaseRequest(HttpRequest::openStream);
+        LastfmWebApi api = new LastfmWebApi(req);
+        TrackDto[] tracks = api.getTopTracks("spain", 1);
+        assertEquals("The Less I Know the Better", tracks[0].getName());
+    }
 }

@@ -1,4 +1,4 @@
-package org.isel.jingle.utils;
+package org.isel.jingle.util;
 
 import java.util.Iterator;
 import java.util.LinkedList;

@@ -35,7 +35,7 @@ import org.isel.jingle.model.Artist;
 import org.isel.jingle.model.Track;
 import org.isel.jingle.req.BaseRequest;
 import org.isel.jingle.req.HttpRequest;
-import org.isel.jingle.utils.StreamUtils;
+import org.isel.jingle.util.StreamUtils;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -75,10 +75,10 @@ public class JingleServiceTest {
     public void searchHiperAndCountAllResultsWithCache() {
         HttpGet httpGet = new HttpGet();
         JingleService service = new JingleService(new LastfmWebApi(new BaseRequest(httpGet)));
-        Stream<Artist> artists = service.searchArtist("hiper");
+        Supplier<Stream<Artist>> artists = () -> service.searchArtist("hiper");
         Supplier<Stream<Artist>> artistsSupplier = StreamUtils.cache(artists);
         Object[] expected = artistsSupplier.get().limit(700).toArray();
-        Object[] actual = artistsSupplier.get().limit(800).toArray();
+        Object[] actual = artistsSupplier.get().limit(700).toArray();
         assertArrayEquals(expected,actual);
         assertEquals(24, httpGet.count);
     }
@@ -137,5 +137,18 @@ public class JingleServiceTest {
         long countTracks = service.searchArtist("muse").findFirst().get().getTracks().limit(500).count();
         assertEquals(500, countTracks);
         assertEquals(78, httpGet.count); // Each page has 50 albums => 50 requests to get their tracks. Some albums have no tracks.
+    }
+
+    @Test
+    public void getTop100TracksOfSpain() {
+        HttpGet httpGet = new HttpGet();
+        JingleService service = new JingleService(new LastfmWebApi(new BaseRequest(httpGet)));
+        Supplier<Stream<Track>> tracksSupplier = () -> service.getTopTracks("spain");
+        assertEquals(0, httpGet.count);
+        long count = tracksSupplier.get().limit(100).count();
+        assertEquals(100, count);
+        assertEquals(2, httpGet.count);
+        Track first = tracksSupplier.get().findFirst().get();
+        assertEquals("The Less I Know the Better", first.getName());
     }
 }
