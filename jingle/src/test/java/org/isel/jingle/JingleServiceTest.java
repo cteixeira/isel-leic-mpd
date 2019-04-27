@@ -151,4 +151,13 @@ public class JingleServiceTest {
         Track first = tracksSupplier.get().findFirst().get();
         assertEquals("The Less I Know the Better", first.getName());
     }
+
+    @Test
+    public void getTopTracksOfMuseInSpain() {
+        HttpGet httpGet = new HttpGet();
+        JingleService service = new JingleService(new LastfmWebApi(new BaseRequest(httpGet)));
+        Artist muse = service.searchArtist("muse").findFirst().get();
+        long countAlbuns = muse.getTracksRank("spain").count();
+        assertEquals(100, countAlbuns);
+    }
 }

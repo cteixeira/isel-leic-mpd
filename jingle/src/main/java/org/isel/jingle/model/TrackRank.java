@@ -30,63 +30,20 @@
 
 package org.isel.jingle.model;
 
-import org.isel.jingle.SupplierByCountry;
+public class TrackRank {
+    private final Track track;
+    private final int rank;
 
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
-public class Artist {
-    final String name;
-    final int listeners;
-    final String mbid;
-    final String url;
-    final String image;
-    final Supplier<Stream<Album>> albums;
-    final Supplier<Stream<Track>> tracks;
-    final SupplierByCountry<Stream<TrackRank>> tracksRank;
-
-    public Artist(String name, int listeners, String mbid, String url, String image,
-                  Supplier<Stream<Album>> albums,
-                  Supplier<Stream<Track>> tracks,
-                  SupplierByCountry<Stream<TrackRank>> tracksRank) {
-        this.name = name;
-        this.listeners = listeners;
-        this.mbid = mbid;
-        this.url = url;
-        this.image = image;
-        this.albums = albums;
-        this.tracks = tracks;
-        this.tracksRank = tracksRank;
+    public TrackRank(Track track, int rank) {
+        this.track = track;
+        this.rank = rank;
     }
 
-    public String getName() {
-        return name;
+    public Track getTrack() {
+        return track;
     }
 
-    public int getListeners() {
-        return listeners;
+    public int getRank() {
+        return rank;
     }
-
-    public String getMbid() {
-        return mbid;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public Stream<Album> getAlbums() {
-        return albums.get();
-    }
-
-    public Stream<Track> getTracks() {
-        return tracks.get();
-    }
-
-    public Stream<TrackRank> getTracksRank(String country) { return tracksRank.get(country); }
-
 }

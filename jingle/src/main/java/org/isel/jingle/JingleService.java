@@ -36,6 +36,7 @@ import org.isel.jingle.dto.TrackDto;
 import org.isel.jingle.model.Album;
 import org.isel.jingle.model.Artist;
 import org.isel.jingle.model.Track;
+import org.isel.jingle.model.TrackRank;
 import org.isel.jingle.req.BaseRequest;
 import org.isel.jingle.req.HttpRequest;
 
@@ -90,6 +91,7 @@ public class JingleService {
 
         Supplier<Stream<Album>> albumsSupplier = () -> getAlbums(mbId);
         Supplier<Stream<Track>> tracksSupplier = () -> getTracks(mbId);
+        SupplierByCountry<Stream<TrackRank>> tracksRankSupplier = (country) -> getTracksRank(mbId, country);
 
         return new Artist(
                 artistDto.getName(),
@@ -98,7 +100,8 @@ public class JingleService {
                 artistDto.getUrl(),
                 null,
                 albumsSupplier,
-                tracksSupplier);
+                tracksSupplier,
+                tracksRankSupplier);
     }
 
     private Stream<Album> getAlbums(String artistMbid) {
@@ -139,8 +142,20 @@ public class JingleService {
                 .map(this::toTrack);
     }
 
+    private Stream<TrackRank> getTracksRank(String artistMbId, String country) {
+        Stream<Track> artistTracks = getTracks(artistMbId);
+        Stream<Track> topTracks = getTopTracks(country).limit(100);
+
+        int[] i = {1};
+        return topTracks.map(t -> toTrackRank(t, i[0]++));
+    }
+
     private Track toTrack(TrackDto trackDto) {
         return trackDto != null ? new Track(trackDto.getName(), trackDto.getUrl(), trackDto.getDuration()) : null;
+    }
+
+    private TrackRank toTrackRank(Track track, int rank) {
+        return new TrackRank(track, rank);
     }
 
 
