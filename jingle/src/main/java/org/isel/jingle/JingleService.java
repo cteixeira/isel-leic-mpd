@@ -39,7 +39,12 @@ import org.isel.jingle.model.Track;
 import org.isel.jingle.model.TrackRank;
 import org.isel.jingle.req.BaseRequest;
 import org.isel.jingle.req.HttpRequest;
+import org.isel.jingle.util.StreamUtils;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -68,21 +73,6 @@ public class JingleService {
                     return Stream.of(artistsArr);
                 })
                 .map(this::toArtist);
-    }
-
-    public Stream<Track> getTopTracks(String country) {
-
-        boolean hasMore[] = {true};
-
-        return Stream
-                .iterate(1, page -> page + 1)
-                .takeWhile(page -> hasMore[0])
-                .flatMap(page -> {
-                    TrackDto[] tracksArr = api.getTopTracks(country, page);
-                    hasMore[0] = tracksArr.length > 0;
-                    return Stream.of(tracksArr);
-                })
-                .map(this::toTrack);
     }
 
     private Artist toArtist(ArtistDto artistDto) {
@@ -142,12 +132,40 @@ public class JingleService {
                 .map(this::toTrack);
     }
 
+    public Stream<Track> getTopTracks(String country) {
+
+        boolean hasMore[] = {true};
+
+        return Stream
+                .iterate(1, page -> page + 1)
+                .takeWhile(page -> hasMore[0])
+                .flatMap(page -> {
+                    TrackDto[] tracksArr = api.getTopTracks(country, page);
+                    hasMore[0] = tracksArr.length > 0;
+                    return Stream.of(tracksArr);
+                })
+                .map(this::toTrack);
+    }
+
     private Stream<TrackRank> getTracksRank(String artistMbId, String country) {
-        Stream<Track> artistTracks = getTracks(artistMbId);
-        Stream<Track> topTracks = getTopTracks(country).limit(100);
 
         int[] i = {1};
-        return topTracks.map(t -> toTrackRank(t, i[0]++));
+        Stream<Track> artistTracks = getTracks(artistMbId);
+        Stream<TrackRank> topTracks =
+                getTopTracks(country)
+                        .limit(100)
+                        .map(t -> new TrackRank(t, i[0]++));
+
+        BiPredicate<Track, TrackRank> pred = (artT, topT) -> artT.getName().toLowerCase().equals(topT.getTrack().getName().toLowerCase());
+        BiFunction<Track, TrackRank, TrackRank> transf = (artT, topT) -> new TrackRank(artT, topT.getRank());
+
+        return StreamUtils.merge(
+                artistTracks,
+                topTracks,
+                pred,
+                transf,
+                new TrackRank(null, 0));
+
     }
 
     private Track toTrack(TrackDto trackDto) {

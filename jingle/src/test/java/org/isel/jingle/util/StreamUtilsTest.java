@@ -3,6 +3,7 @@ package org.isel.jingle.util;
 import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,7 +22,6 @@ public class StreamUtilsTest {
     @Test
     public void shouldMergeSequencesWithoutDuplicatesOnSeq2Ascending() {
         final List<String> merged = merge(seq2Asc);
-
         assertEquals(expected, merged);
     }
 

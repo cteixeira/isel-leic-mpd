@@ -30,9 +30,11 @@
 
 package org.isel.jingle;
 
+import junit.framework.Assert;
 import org.isel.jingle.model.Album;
 import org.isel.jingle.model.Artist;
 import org.isel.jingle.model.Track;
+import org.isel.jingle.model.TrackRank;
 import org.isel.jingle.req.BaseRequest;
 import org.isel.jingle.req.HttpRequest;
 import org.isel.jingle.util.StreamUtils;
@@ -64,7 +66,7 @@ public class JingleServiceTest {
         Supplier<Stream<Artist>> artists = () -> service.searchArtist("hiper");
         assertEquals(0, httpGet.count);
         long countArtists = artists.get().count();
-        assertEquals(702, countArtists); //GROUP5: CHANGED FROM 700 TO 702
+        assertEquals(704, countArtists); //GROUP5: CHANGED FROM 700 TO 702
         assertEquals(25, httpGet.count);
         Artist last = artists.get().skip(countArtists-1).findFirst().get();
         assertEquals("Coma - Hipertrofia.(2008)", last.getName());
@@ -157,7 +159,13 @@ public class JingleServiceTest {
         HttpGet httpGet = new HttpGet();
         JingleService service = new JingleService(new LastfmWebApi(new BaseRequest(httpGet)));
         Artist muse = service.searchArtist("muse").findFirst().get();
-        long countAlbuns = muse.getTracksRank("spain").count();
-        assertEquals(100, countAlbuns);
+        Stream<TrackRank> tracksRank = muse.getTracksRank("spain");
+        int[] numberTracksWithRank = {0};
+        tracksRank.forEach(t -> {
+            if (t.getRank() != 0)
+                numberTracksWithRank[0]++;
+            System.out.println(String.format("Track: %s Ranking %d", t.getTrack().getName(), t.getRank()));
+        });
+        Assert.assertEquals(37, numberTracksWithRank[0]);
     }
 }
