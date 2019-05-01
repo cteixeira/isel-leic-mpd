@@ -34,7 +34,6 @@ public class StreamUtilsTest {
     @Test
     public void shouldMergeSequencesWithDuplicatesOnSeq2Descending() {
         final List<String> merged = merge(seq2Desc);
-
         assertEquals(expected, merged);
     }
 

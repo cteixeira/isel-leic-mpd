@@ -66,21 +66,21 @@ public class JingleServiceTest {
         Supplier<Stream<Artist>> artists = () -> service.searchArtist("hiper");
         assertEquals(0, httpGet.count);
         long countArtists = artists.get().count();
-        assertEquals(704, countArtists); //GROUP5: CHANGED FROM 700 TO 702
+        assertEquals(708, countArtists); //GROUP5: CHANGED FROM 700 TO 702
         assertEquals(25, httpGet.count);
-        Artist last = artists.get().skip(countArtists-1).findFirst().get();
+        //Artist last = artists.get().skip(countArtists-1).findFirst().get();
+        Artist last = artists.get().reduce((a1, a2) -> a2).get();
         assertEquals("Coma - Hipertrofia.(2008)", last.getName());
-        assertEquals(49, httpGet.count);
+        assertEquals(50, httpGet.count);
     }
 
     @Test
     public void searchHiperAndCountAllResultsWithCache() {
         HttpGet httpGet = new HttpGet();
         JingleService service = new JingleService(new LastfmWebApi(new BaseRequest(httpGet)));
-        Supplier<Stream<Artist>> artists = () -> service.searchArtist("hiper");
-        Supplier<Stream<Artist>> artistsSupplier = StreamUtils.cache(artists);
-        Object[] expected = artistsSupplier.get().limit(700).toArray();
-        Object[] actual = artistsSupplier.get().limit(700).toArray();
+        Supplier<Stream<Artist>> artistsSupplierCached = StreamUtils.cache(service.searchArtist("hiper"));
+        Object[] expected = artistsSupplierCached.get().limit(700).toArray();
+        Object[] actual = artistsSupplierCached.get().limit(700).toArray();
         assertArrayEquals(expected,actual);
         assertEquals(24, httpGet.count);
     }

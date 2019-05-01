@@ -16,7 +16,6 @@ public class SpliteratorCache<T> extends Spliterators.AbstractSpliterator<T> {
         super(Long.MAX_VALUE, Spliterator.ORDERED);
         this.src = src;
         this.cache = list;
-        pos = 0;
     }
 
     @Override
